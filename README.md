@@ -8,25 +8,15 @@ Step 1- Define the goal(s)
 
     • Who are the top employers?
 
-    • Drill-in to top employers to see if correlation exists by searching media APIs. 
-
 
 Step 2- Actionable- what's the point of the story?
 
-    • To determine what are the desirable skillsets for Data Science applicants
+    • To determine what are the desirable skillsets for data science applicants.
 
-    • To determine what industries are most popular for data science (possible drill-in to search how many tech companies are in the radius)
-
-
-Step 3- What data do you have and what data do you need?
-
-    • Monster and Indeed API to gather job descriptions and metadata
+    • To determine what industries are most popular for data science.
 
 
-Step 4- What analysis needs to be done?
+Step 3 - Determine the data source
 
-    - Descriptive- sums/counts
-    
-    - Predictive?
-    
-    - Causal inference- dependent on data.
+    • Dataset retrived from Kaggle - data was scraped from Indeed as of 8/3/2018.
+
