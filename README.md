@@ -1,6 +1,6 @@
 # Data_Science_Job_Market
 
-Step 1- Define the goal(s)
+## Step 1- Define the goal(s)
 
     • What are the top skills required for data science jobs?
 
@@ -9,14 +9,14 @@ Step 1- Define the goal(s)
     • Who are the top employers?
 
 
-Step 2- Actionable- what's the point of the story?
+## Step 2- Actionable- what's the point of the story?
 
     • To determine what are the desirable skillsets for data science applicants.
 
     • To determine what industries are most popular for data science.
 
 
-Step 3 - Determine the data source
+## Step 3 - Determine the data source
 
     • Dataset retrived from Kaggle - data was scraped from Indeed as of 8/3/2018.
 
