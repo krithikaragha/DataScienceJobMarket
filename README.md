@@ -1,4 +1,4 @@
-# Data_Science_Job_Market
+# Data Science Job Market
 
 ![Data Science](Images/data_science_poster.png)
 
