@@ -729,19 +729,6 @@ distinct_locations_df = distinct_locations_df.drop_duplicates(keep='first', inpl
 distinct_locations_df
 ```
 
-    /anaconda3/lib/python3.7/site-packages/ipykernel_launcher.py:3: SettingWithCopyWarning: 
-    A value is trying to be set on a copy of a slice from a DataFrame.
-    Try using .loc[row_indexer,col_indexer] = value instead
-    
-    See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
-      This is separate from the ipykernel package so we can avoid doing imports until
-    /anaconda3/lib/python3.7/site-packages/ipykernel_launcher.py:4: SettingWithCopyWarning: 
-    A value is trying to be set on a copy of a slice from a DataFrame.
-    Try using .loc[row_indexer,col_indexer] = value instead
-    
-    See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
-      after removing the cwd from sys.path.
-
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -1186,33 +1173,27 @@ for index, row in distinct_locations_df.iterrows():
     target_url = ('https://maps.googleapis.com/maps/api/geocode/json?'
     'address={0}&key={1}').format(target_city, gkey)
     geo_data = requests.get(target_url).json()
+    
     try:
-        distinct_locations_df.loc[index, 'longitude'] = geo_data["results"][0]["geometry"]["location"]["lat"]
-        distinct_locations_df.loc[index, 'latitude'] = geo_data["results"][0]["geometry"]["location"]["lng"]
+        distinct_locations_df.loc[index, 'latitude'] = geo_data["results"][0]["geometry"]["location"]["lat"]
+        distinct_locations_df.loc[index, 'longitude'] = geo_data["results"][0]["geometry"]["location"]["lng"]
     except (KeyError, IndexError):
         print("Missing field/result... skipping.")
+        
 ```
-
-    Missing field/result... skipping.
-    Missing field/result... skipping.
-    Missing field/result... skipping.
-    Missing field/result... skipping.
-    Missing field/result... skipping.
-    Missing field/result... skipping.
-
 
 
 ```python
-# Get the number of times a location popped up (using the original dataframe)
-weights_group = df.groupby(["location"])
-weights = weights_group["location"].count()
-
+# Get the number of times a location popped up (using the original dataframe
 # Create a new column in the distinct locations dataframe for number of instances
-distinct_locations_df["Number of Job Postings"] = weights
+distinct_locations_df["Number of Job Postings"] = df.groupby(["location"])['location'].transform('count')
 
 # Delete empty rows
 non_empty_rows = distinct_locations_df["longitude"] != ""
 distinct_locations_df = distinct_locations_df[non_empty_rows]
+
+# Delete rows with incorrect longitude values
+distinct_locations_df = distinct_locations_df[(distinct_locations_df['longitude'] > -90) & (distinct_locations_df['longitude'] < 90)]
 
 distinct_locations_df
 ```
@@ -1220,390 +1201,213 @@ distinct_locations_df
   <thead>
     <tr style="text-align: right;">
       <th></th>
+      <th>location</th>
       <th>state</th>
       <th>longitude</th>
       <th>latitude</th>
       <th>Number of Job Postings</th>
     </tr>
-    <tr>
-      <th>location</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
   </thead>
   <tbody>
     <tr>
-      <th>Atlanta, GA</th>
+      <th>2</th>
+      <td>Atlanta, GA</td>
       <td>GA</td>
-      <td>33.749</td>
       <td>-84.388</td>
+      <td>33.749</td>
       <td>108</td>
     </tr>
     <tr>
-      <th>Boulder, CO</th>
-      <td>CO</td>
-      <td>40.015</td>
-      <td>-105.271</td>
-      <td>25</td>
-    </tr>
-    <tr>
-      <th>Boston, MA</th>
+      <th>744</th>
+      <td>Boston, MA</td>
       <td>MA</td>
-      <td>42.3601</td>
       <td>-71.0589</td>
+      <td>42.3601</td>
       <td>227</td>
     </tr>
     <tr>
-      <th>Chicago, IL</th>
+      <th>1371</th>
+      <td>Chicago, IL</td>
       <td>IL</td>
-      <td>41.8781</td>
       <td>-87.6298</td>
+      <td>41.8781</td>
       <td>204</td>
     </tr>
     <tr>
-      <th>Los Angeles, CA</th>
-      <td>CA</td>
-      <td>34.0522</td>
-      <td>-118.244</td>
-      <td>74</td>
-    </tr>
-    <tr>
-      <th>Cambridge, MA</th>
+      <th>2438</th>
+      <td>Cambridge, MA</td>
       <td>MA</td>
-      <td>52.2053</td>
       <td>0.121817</td>
+      <td>52.2053</td>
       <td>134</td>
     </tr>
     <tr>
-      <th>Mountain View, CA</th>
-      <td>CA</td>
-      <td>37.3861</td>
-      <td>-122.084</td>
-      <td>121</td>
-    </tr>
-    <tr>
-      <th>New York, NY</th>
+      <th>3409</th>
+      <td>New York, NY</td>
       <td>NY</td>
-      <td>40.7128</td>
       <td>-74.006</td>
+      <td>40.7128</td>
       <td>504</td>
     </tr>
     <tr>
-      <th>Jersey City, NJ</th>
+      <th>3412</th>
+      <td>Jersey City, NJ</td>
       <td>NJ</td>
-      <td>40.7178</td>
       <td>-74.0431</td>
+      <td>40.7178</td>
       <td>14</td>
     </tr>
     <tr>
-      <th>Manhattan, NY</th>
+      <th>3417</th>
+      <td>Manhattan, NY</td>
       <td>NY</td>
-      <td>40.7831</td>
       <td>-73.9712</td>
+      <td>40.7831</td>
       <td>12</td>
     </tr>
     <tr>
-      <th>Newark, NJ</th>
+      <th>3422</th>
+      <td>Newark, NJ</td>
       <td>NJ</td>
-      <td>40.7357</td>
       <td>-74.1724</td>
+      <td>40.7357</td>
       <td>4</td>
     </tr>
     <tr>
-      <th>Rutherford, NJ</th>
+      <th>3481</th>
+      <td>Hoboken, NJ</td>
       <td>NJ</td>
-      <td>37.0902</td>
-      <td>-95.7129</td>
+      <td>-74.0324</td>
+      <td>40.744</td>
       <td>1</td>
     </tr>
     <tr>
-      <th>Union, NJ</th>
-      <td>NJ</td>
-      <td>37.0902</td>
-      <td>-95.7129</td>
-      <td>3</td>
+      <th>3489</th>
+      <td>Brooklyn, NY</td>
+      <td>NY</td>
+      <td>-73.9442</td>
+      <td>40.6782</td>
+      <td>7</td>
     </tr>
     <tr>
-      <th>Rahway, NJ</th>
+      <th>3514</th>
+      <td>Rutherford, NJ</td>
       <td>NJ</td>
-      <td>40.6082</td>
+      <td>-74.1068</td>
+      <td>40.8265</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3549</th>
+      <td>Rahway, NJ</td>
+      <td>NJ</td>
       <td>-74.2776</td>
+      <td>40.6082</td>
       <td>2</td>
     </tr>
     <tr>
-      <th>Murray Hill, NJ</th>
+      <th>3577</th>
+      <td>Murray Hill, NJ</td>
       <td>NJ</td>
-      <td>40.7479</td>
       <td>-73.9757</td>
+      <td>40.7479</td>
       <td>4</td>
     </tr>
     <tr>
-      <th>Troy Hills, NJ</th>
+      <th>3653</th>
+      <td>Troy Hills, NJ</td>
       <td>NJ</td>
-      <td>40.8529</td>
       <td>-74.3921</td>
+      <td>40.8529</td>
       <td>1</td>
     </tr>
     <tr>
-      <th>Queens, NY</th>
+      <th>3729</th>
+      <td>Queens, NY</td>
       <td>NY</td>
-      <td>40.7282</td>
       <td>-73.7949</td>
+      <td>40.7282</td>
       <td>8</td>
     </tr>
     <tr>
-      <th>Fort Lee, NJ</th>
+      <th>3863</th>
+      <td>Fort Lee, NJ</td>
       <td>NJ</td>
-      <td>37.249</td>
       <td>-77.3382</td>
+      <td>37.249</td>
       <td>1</td>
     </tr>
     <tr>
-      <th>Parsippany, NJ</th>
+      <th>3909</th>
+      <td>Parsippany, NJ</td>
       <td>NJ</td>
-      <td>40.8653</td>
       <td>-74.4174</td>
+      <td>40.8653</td>
       <td>1</td>
     </tr>
     <tr>
-      <th>Long Beach, NY</th>
-      <td>NY</td>
-      <td>33.7701</td>
-      <td>-118.194</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>Whippany, NJ</th>
+      <th>4035</th>
+      <td>Whippany, NJ</td>
       <td>NJ</td>
-      <td>40.8254</td>
       <td>-74.4022</td>
+      <td>40.8254</td>
       <td>1</td>
     </tr>
     <tr>
-      <th>New Hyde Park, NY</th>
+      <th>4205</th>
+      <td>New Hyde Park, NY</td>
       <td>NY</td>
-      <td>40.7351</td>
       <td>-73.6879</td>
+      <td>40.7351</td>
       <td>1</td>
     </tr>
     <tr>
-      <th>Secaucus, NJ</th>
+      <th>4215</th>
+      <td>Secaucus, NJ</td>
       <td>NJ</td>
-      <td>40.7895</td>
       <td>-74.0565</td>
+      <td>40.7895</td>
       <td>1</td>
     </tr>
     <tr>
-      <th>Port Washington, NY</th>
+      <th>4292</th>
+      <td>Port Washington, NY</td>
       <td>NY</td>
-      <td>40.8257</td>
       <td>-73.6982</td>
+      <td>40.8257</td>
       <td>1</td>
     </tr>
     <tr>
-      <th>Short Hills, NJ</th>
+      <th>4311</th>
+      <td>Short Hills, NJ</td>
       <td>NJ</td>
-      <td>40.7483</td>
       <td>-74.3232</td>
+      <td>40.7483</td>
       <td>1</td>
     </tr>
     <tr>
-      <th>Woodcliff Lake, NJ</th>
+      <th>4328</th>
+      <td>Woodcliff Lake, NJ</td>
       <td>NJ</td>
-      <td>41.0234</td>
       <td>-74.0665</td>
+      <td>41.0234</td>
       <td>1</td>
     </tr>
     <tr>
-      <th>Redmond, WA</th>
-      <td>WA</td>
-      <td>47.674</td>
-      <td>-122.122</td>
-      <td>67</td>
-    </tr>
-    <tr>
-      <th>San Diego, CA</th>
+      <th>5906</th>
+      <td>Belmont, CA</td>
       <td>CA</td>
-      <td>32.7157</td>
-      <td>-117.161</td>
-      <td>83</td>
-    </tr>
-    <tr>
-      <th>Seattle, WA</th>
-      <td>WA</td>
-      <td>47.6062</td>
-      <td>-122.332</td>
-      <td>291</td>
-    </tr>
-    <tr>
-      <th>San Francisco, CA</th>
-      <td>CA</td>
-      <td>37.7749</td>
-      <td>-122.419</td>
-      <td>382</td>
-    </tr>
-    <tr>
-      <th>Redwood City, CA</th>
-      <td>CA</td>
-      <td>37.4852</td>
-      <td>-122.236</td>
-      <td>26</td>
-    </tr>
-    <tr>
-      <th>San Mateo, CA</th>
-      <td>CA</td>
-      <td>37.563</td>
-      <td>-122.326</td>
-      <td>27</td>
-    </tr>
-    <tr>
-      <th>Menlo Park, CA</th>
-      <td>CA</td>
-      <td>37.453</td>
-      <td>-122.182</td>
-      <td>5</td>
-    </tr>
-    <tr>
-      <th>Foster City, CA</th>
-      <td>CA</td>
-      <td>37.5585</td>
-      <td>-122.271</td>
-      <td>5</td>
-    </tr>
-    <tr>
-      <th>Oakland, CA</th>
-      <td>CA</td>
-      <td>37.8044</td>
-      <td>-122.271</td>
-      <td>20</td>
-    </tr>
-    <tr>
-      <th>Berkeley, CA</th>
-      <td>CA</td>
-      <td>37.8716</td>
-      <td>-122.273</td>
-      <td>6</td>
-    </tr>
-    <tr>
-      <th>San Francisco Bay Area, CA</th>
-      <td>CA</td>
-      <td>37.8272</td>
-      <td>-122.291</td>
-      <td>10</td>
-    </tr>
-    <tr>
-      <th>Emeryville, CA</th>
-      <td>CA</td>
-      <td>37.8313</td>
-      <td>-122.285</td>
-      <td>7</td>
-    </tr>
-    <tr>
-      <th>South San Francisco, CA</th>
-      <td>CA</td>
-      <td>37.6547</td>
-      <td>-122.408</td>
-      <td>18</td>
-    </tr>
-    <tr>
-      <th>San Carlos, CA</th>
-      <td>CA</td>
-      <td>37.5072</td>
-      <td>-122.261</td>
-      <td>9</td>
-    </tr>
-    <tr>
-      <th>Union City, CA</th>
-      <td>CA</td>
-      <td>37.5934</td>
-      <td>-122.044</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>Burlingame, CA</th>
-      <td>CA</td>
-      <td>37.5779</td>
-      <td>-122.348</td>
-      <td>5</td>
-    </tr>
-    <tr>
-      <th>Belmont, CA</th>
-      <td>CA</td>
-      <td>36.1329</td>
       <td>-86.7941</td>
+      <td>36.1329</td>
       <td>3</td>
     </tr>
     <tr>
-      <th>Richmond, CA</th>
+      <th>5918</th>
+      <td>Richmond, CA</td>
       <td>CA</td>
-      <td>37.5407</td>
       <td>-77.436</td>
+      <td>37.5407</td>
       <td>5</td>
-    </tr>
-    <tr>
-      <th>San Bruno, CA</th>
-      <td>CA</td>
-      <td>37.6305</td>
-      <td>-122.411</td>
-      <td>7</td>
-    </tr>
-    <tr>
-      <th>San Ramon, CA</th>
-      <td>CA</td>
-      <td>37.7799</td>
-      <td>-121.978</td>
-      <td>3</td>
-    </tr>
-    <tr>
-      <th>Alameda, CA</th>
-      <td>CA</td>
-      <td>37.7652</td>
-      <td>-122.242</td>
-      <td>3</td>
-    </tr>
-    <tr>
-      <th>Daly City, CA</th>
-      <td>CA</td>
-      <td>37.6879</td>
-      <td>-122.47</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>Mill Valley, CA</th>
-      <td>CA</td>
-      <td>37.906</td>
-      <td>-122.545</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>Kentfield, CA</th>
-      <td>CA</td>
-      <td>37.9521</td>
-      <td>-122.557</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>Walnut Creek, CA</th>
-      <td>CA</td>
-      <td>37.9101</td>
-      <td>-122.065</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>Hayward, CA</th>
-      <td>CA</td>
-      <td>37.6688</td>
-      <td>-122.081</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>Sunnyvale, CA</th>
-      <td>CA</td>
-      <td>37.3688</td>
-      <td>-122.036</td>
-      <td>83</td>
     </tr>
   </tbody>
 </table>
@@ -1614,7 +1418,9 @@ distinct_locations_df
 
 ```python
 # Store latitude and longitude in locations
-locations = distinct_locations_df[["longitude","latitude"]]
+longitudes_list = distinct_locations_df["longitude"].tolist()
+latitudes_list = distinct_locations_df["latitude"].tolist()
+locations = list(zip(latitudes_list, longitudes_list))
 
 # Convert the Number of Instances column to float so that it can be used as weights in the DF
 weights = distinct_locations_df[["Number of Job Postings"]].astype(float)
@@ -1635,7 +1441,7 @@ heat_layer = gmaps.heatmap_layer(locations, weights = weights_list,
 # Add layer
 fig.add_layer(heat_layer)
 
-# Save the figure
+# Display the figure
 fig
 ```
 
@@ -1662,44 +1468,34 @@ total_listings
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
-      <td>CA</td>
-      <td>909</td>
-    </tr>
-    <tr>
-      <th>6</th>
+      <th>5</th>
       <td>NY</td>
-      <td>527</td>
+      <td>533</td>
     </tr>
     <tr>
-      <th>4</th>
+      <th>3</th>
       <td>MA</td>
       <td>361</td>
     </tr>
     <tr>
-      <th>7</th>
-      <td>WA</td>
-      <td>358</td>
-    </tr>
-    <tr>
-      <th>3</th>
+      <th>2</th>
       <td>IL</td>
       <td>204</td>
     </tr>
     <tr>
-      <th>2</th>
+      <th>1</th>
       <td>GA</td>
       <td>108</td>
     </tr>
     <tr>
-      <th>5</th>
+      <th>4</th>
       <td>NJ</td>
-      <td>35</td>
+      <td>33</td>
     </tr>
     <tr>
-      <th>1</th>
-      <td>CO</td>
-      <td>25</td>
+      <th>0</th>
+      <td>CA</td>
+      <td>8</td>
     </tr>
   </tbody>
 </table>
@@ -1709,21 +1505,31 @@ total_listings
 
 
 ```python
+print(plt.style.available)
+```
+
+    ['seaborn-dark', 'seaborn-darkgrid', 'seaborn-ticks', 'fivethirtyeight', 'seaborn-whitegrid', 'classic', '_classic_test', 'fast', 'seaborn-talk', 'seaborn-dark-palette', 'seaborn-bright', 'seaborn-pastel', 'grayscale', 'seaborn-notebook', 'ggplot', 'seaborn-colorblind', 'seaborn-muted', 'seaborn', 'Solarize_Light2', 'seaborn-paper', 'bmh', 'tableau-colorblind10', 'seaborn-white', 'dark_background', 'seaborn-poster', 'seaborn-deep']
+
+
+
+```python
 # Create a bar chart
 ax = total_listings.plot.bar(x="state", y="Number of Job Postings", 
-                        title = "Number of Job Postings by State", align="center",legend=False, figsize=(15,10))
+                        title = "Number of Job Postings by State", align="center",legend=False, figsize=(15,10),
+                        color=["red", "orange", "green", "yellow", "blue"])
 plt.ylabel("Number of Job Postings")
+plt.style.use("classic")
 
 totals = []
 for p in ax.patches:
-    ax.annotate(str(p.get_height()), (p.get_x(), p.get_height() + 10), fontsize = 20) 
+   ax.annotate(str(p.get_height()), (p.get_x(), p.get_height() + 10), fontsize = 20) 
 
-# Show and save chart
-plt.savefig('Images/jobpostingsbystatebarchart.png', bbox_inches = 'tight')
+#Show and save chart
+plt.savefig('jobpostingsbystatebarchart.png', bbox_inches = 'tight')
 ```
 
 
-![png](Output/output_20_0.png)
+![png](Output/output_21_0.png)
 
 
 
@@ -1735,7 +1541,7 @@ nltk.download('punkt')
 ```
 
     [nltk_data] Downloading package punkt to /Users/krithika/nltk_data...
-    [nltk_data]   Unzipping tokenizers/punkt.zip.
+    [nltk_data]   Package punkt is already up-to-date!
 
 
 
@@ -1789,6 +1595,7 @@ word_count_df = pd.DataFrame({"language": keywords,
                             "count":skill_word_count})
 word_count_df
 ```
+
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -1903,15 +1710,18 @@ word_count_df
 ```python
 # Create Bar Chart for words
 word_count_df = word_count_df.sort_values('count')
-word_count_df.plot.barh(x="language", y="count", title = "Desired Technical Skills", align="center",legend=False, figsize=(15, 10))
+word_count_df.plot.barh(x="language", y="count", title = "Desired Technical Skills", 
+                        align="center",legend=False, figsize=(15, 10),
+                        color=["red", "orange", "green", "yellow", "blue", "pink", "purple", "brown", "gray"])
 plt.xlabel("Count of Jobs Requiring Skill")
 plt.ylabel("Technical Tools")
+plt.style.use("ggplot")
 
 plt.savefig('Images/language_count.jpg')
 ```
 
 
-![png](Output/output_26_0.png)
+![png](Output/output_27_0.png)
 
 
 
@@ -2024,7 +1834,7 @@ plt.show()
 ```
 
 
-![png](Output/output_31_0.png)
+![png](Output/output_32_0.png)
 
 
 
@@ -2043,10 +1853,5 @@ plt.show()
 ```
 
 
-![png](Output/output_32_0.png)
+![png](Output/output_33_0.png)
 
-
-
-```python
-
-```
